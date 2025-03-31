@@ -1,20 +1,25 @@
- import 'package:flutter/gestures.dart';
+import 'dart:developer';
+import 'package:exam_app/JSON/users.dart';
+import 'package:exam_app/SQLite/database_helper.dart';
+import 'package:exam_app/routes/routes.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
-
   @override
   State<SignUpScreen> createState() => _SignUpScreenState();
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
+
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   TextEditingController nameController = TextEditingController();
   TextEditingController passController = TextEditingController();
   TextEditingController conPassController = TextEditingController();
   TextEditingController emailController = TextEditingController();
+  DatabaseHelper db = DatabaseHelper();
 
   @override
   Widget build(BuildContext context) {
@@ -71,21 +76,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             ),
                           ),
                           const SizedBox(height: 60),
-                          // First Name
-                          TextField(
+                          // User Name
+                          TextFormField(
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter user name';
+                              }
+                              return null;
+                            },
                             controller: nameController,
                             decoration: InputDecoration(
-                              hintText: "First name",
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                          // Last Name
-                          TextField(
-                            decoration: InputDecoration(
-                              hintText: "Last name",
+                              hintText: "User name",
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(10),
                               ),
@@ -93,7 +94,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           ),
                           const SizedBox(height: 20),
                           // Email
-                          TextField(
+                          TextFormField(
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter email';
+                              }
+                              return null;
+                            },
                             controller: emailController,
                             keyboardType: TextInputType.emailAddress,
                             decoration: InputDecoration(
@@ -105,7 +112,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           ),
                           const SizedBox(height: 20),
                           // Password
-                          TextField(
+                          TextFormField(
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter password';
+                              }
+                              return null;
+                            },
                             controller: passController,
                             obscureText: true,
                             decoration: InputDecoration(
@@ -117,7 +130,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           ),
                           const SizedBox(height: 20),
                           // Confirm Password
-                          TextField(
+                          TextFormField(
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please confirm password';
+                              } else if (value != passController.text) {
+                                return 'Passwords do not match';
+                              }
+                              return null;
+                            },
                             controller: conPassController,
                             obscureText: true,
                             decoration: InputDecoration(
@@ -135,12 +156,30 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.black,
                                 padding:
-                                const EdgeInsets.symmetric(vertical: 15),
+                                    const EdgeInsets.symmetric(vertical: 15),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                               ),
                               onPressed: () async {
+                                if (formKey.currentState!.validate()) {
+                                  var res = await db.createUser(
+                                    Users(
+                                      usrName: nameController.text,
+                                      password: passController.text,
+                                      email: emailController.text,
+                                    ),
+                                  );
+                                  if (res > 0) {
+                                    if (!mounted) return;
+                                    Get.offAllNamed(GetRoutes.login);
+                                  }
+                                  Get.snackbar(
+                                    "Register  Successful",
+                                    "Congrat Your New Account Create",
+                                    snackPosition: SnackPosition.BOTTOM,
+                                  );
+                                 }
                               },
                               child: const Text(
                                 "Sign Up",

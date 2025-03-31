@@ -22,7 +22,7 @@ class GetRoutes
         ),
         GetPage(
           name: home,
-          page: () => const HomeScreen(),
+          page: () =>   HomeScreen(),
         ),
         GetPage(
           name: login,
@@ -37,6 +37,4 @@ class GetRoutes
           page: () => const FavouriteScreen(),
         ),
       ];
-
-
 }
